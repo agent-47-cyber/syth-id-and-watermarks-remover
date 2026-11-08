@@ -4,7 +4,15 @@ _ _ _ ____ ___ ____ ____ _  _ ____ ____ _  _ ____    ____ ____ _  _ ____ _  _ __
 |_|_| |  |  |  |___ |  \ |  | |  | |  \ | \_ ___]    |  \ |___ |  | |__|  \/  |___ |  \
 ```
 
-# watermarks-remover
+# Synth ID and AI Media Provenance Cleaner
+
+Personal fork of [`guillaumemeyer/watermarks-remover`](https://github.com/guillaumemeyer/watermarks-remover), maintained as a separate project at [`agent-47-cyber/syth-id-and-watermarks-remover`](https://github.com/agent-47-cyber/syth-id-and-watermarks-remover). The upstream MIT license and its copyright notice are retained; see [`LICENSE`](LICENSE).
+
+For the ownership, attribution, standalone-fork, and licensing notes, see [`docs/LICENSE_AND_OWNERSHIP.md`](docs/LICENSE_AND_OWNERSHIP.md).
+
+This fork adds Windows-oriented setup notes and a CUDA-driver detection fix for the optional CtrlRegen image backend. It remains best-effort: pixel regeneration may alter image details, and video pixel-watermark removal is not supported. See [`docs/AI_MEDIA_GUIDE.md`](docs/AI_MEDIA_GUIDE.md) for the photo/video scope and Windows commands.
+
+The optional CtrlRegen backend is external and its source repository does not publish a license. This fork does not redistribute that backend. Review its terms and obtain permission before redistributing or offering it as part of a public product.
 
 <!-- logo: figlet -d .figlet -f cybermedium -w 120 "watermarks-remover" -->
 

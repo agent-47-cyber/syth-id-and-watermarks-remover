@@ -149,7 +149,11 @@ $cuda = $null
 $cc = $null
 if (Get-Command nvidia-smi -ErrorAction SilentlyContinue) {
     $smi = (& nvidia-smi | Out-String)
-    if ($smi -match 'CUDA Version:\s*([0-9]+\.[0-9]+)') { $cuda = $Matches[1] }
+    # Recent Windows drivers report "CUDA UMD Version" instead of the older
+    # "CUDA Version" label. Both values describe the driver's supported CUDA
+    # ceiling for our wheel selection; the highest published compatible wheel
+    # is selected below.
+    if ($smi -match '(?:CUDA Version|CUDA UMD Version):\s*([0-9]+\.[0-9]+)') { $cuda = $Matches[1] }
     $capRaw = (Invoke-NativeQuiet { & nvidia-smi --query-gpu=compute_cap --format=csv,noheader } | Select-Object -First 1)
     if ($capRaw -and ($capRaw.Trim() -match '^[0-9]+\.[0-9]+$')) { $cc = [double]$capRaw.Trim() }
 }
