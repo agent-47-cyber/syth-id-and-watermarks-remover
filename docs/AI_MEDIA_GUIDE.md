@@ -31,7 +31,13 @@ Use only on images you own or are authorized to modify. Compare the output visua
 
 ## Clean video metadata
 
-The normal service supports metadata cleaning for supported video containers. For a direct CLI pass, use the service API or the container-cleaning scripts documented in `README.md`. This operation does not remove a watermark embedded in video pixels or across frames. Applying the still-image backend frame by frame is not provided because it can cause flicker and temporal inconsistency.
+For supported MP4/MOV/M4V files, strip container metadata with the normal file cleaner:
+
+```powershell
+py .\service\scripts\clean_file.py .\clip.mp4 -o .\clip.cleaned.mp4
+```
+
+This operation does not remove a watermark embedded in video pixels or across frames. Applying the still-image backend frame by frame is not provided because it can cause flicker and temporal inconsistency.
 
 ## Scope
 

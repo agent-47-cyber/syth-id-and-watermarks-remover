@@ -130,9 +130,11 @@ $knownTags = @(
 )
 
 # Picks the wheel index: the highest one <= the driver's CUDA answering 2xx.
-# cc < 7.5 forces cu126 (last index with Maxwell/Pascal/Volta kernels).
+# Older pre-Turing cards and Ada (sm_89) use cu126, whose PyTorch wheels
+# include their kernels. The current cu130 wheel omits sm_89 even though CUDA
+# itself is available, so a driver-only check is not enough for this card.
 function Select-TorchTag([double]$cc, [string]$driverCuda) {
-    if ($cc -and $cc -lt 7.5) { return 'cu126' }
+    if ($cc -and ($cc -lt 7.5 -or [math]::Abs($cc - 8.9) -lt 0.01)) { return 'cu126' }
     if ($driverCuda -notmatch '^([0-9]+)\.([0-9]+)$') { return $null }
     $driverVersion = [version]"$($Matches[1]).$($Matches[2])"
     foreach ($c in $knownTags) {
@@ -165,10 +167,10 @@ if (Get-Command nvidia-smi -ErrorAction SilentlyContinue) {
 # them together closes that hole; the final verification below checks it too.
 $torchOk = $false
 if ($cuda) {
-    if ($cc -and $cc -lt 7.5) {
+    if ($cc -and ($cc -lt 7.5 -or [math]::Abs($cc - 8.9) -lt 0.01)) {
         $tag = 'cu126'
-        Write-Host "NVIDIA GPU with compute capability $cc (pre-Turing): forcing $tag,"
-        Write-Host "because cu128+ / CUDA 13 wheels no longer ship kernels for this card."
+        Write-Host "NVIDIA GPU with compute capability ${cc}: forcing $tag"
+        Write-Host 'because this wheel includes kernels for the detected card.'
     } else {
         $tag = Select-TorchTag $cc $cuda
         if ($tag) {
@@ -179,7 +181,9 @@ if ($cuda) {
     }
     if ($tag) {
         $index = "https://download.pytorch.org/whl/$tag"
-        & $venvPython -m pip install torch torchvision --index-url $index
+        # Force replacement when an existing wheel has the same PyTorch
+        # version but the wrong CUDA build (pip otherwise calls it satisfied).
+        & $venvPython -m pip install --force-reinstall torch torchvision --index-url $index
         if ($LASTEXITCODE -eq 0) { $torchOk = $true }
         else { Write-Warning "the index $index failed; falling back to the default torch" }
     }
@@ -219,6 +223,7 @@ if ($cc -or $cuda) {
                 Write-Warning "available archs: $archs"
                 Write-Warning "reinstall from an older index, e.g.:"
                 Write-Warning "  & '$venvPython' -m pip install --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cu126"
+                exit 1
             } elseif ($archs) {
                 Write-Host "OK: torch includes $smTarget (archs: $archs)"
             }
